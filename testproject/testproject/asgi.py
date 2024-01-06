@@ -15,6 +15,6 @@ sys.path.append(BASE_DIR)
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'testpj.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'testproject.settings')
 
 application = get_asgi_application()
