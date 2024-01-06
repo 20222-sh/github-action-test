@@ -35,6 +35,6 @@ jobs:
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           application_name: pj #EB 애플리케이션명
           environment_name: testproject #EB 환경명
-          version_label: ${{ github.run_number }}
+          version_label: github-action-${{steps.current-time.outputs.formattedTime}}
           region: ap-northeast-2
           deployment_package: deploy.zip
