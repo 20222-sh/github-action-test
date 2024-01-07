@@ -24,7 +24,6 @@ jobs:
 
       - name: Database migration
         run: |
-          source /var/app/venv/staging-LQM1lest/bin/activate
           python manage.py migrate
 
       - name: Generate deployment package
