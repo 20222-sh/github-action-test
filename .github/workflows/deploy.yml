@@ -19,11 +19,13 @@ jobs:
 
       - name: Install dependencies
         run: |
+          cd Watoon
           python -m pip install --upgrade pip
           pip install -r requirements.txt  # 필요한 경우 requirements.txt 파일을 사용하세요.
 
       - name: Database migration
         run: |
+          cd Watoon
           source /var/app/venv/staging-LQM1lest/bin/activate
           python manage.py migrate
 
