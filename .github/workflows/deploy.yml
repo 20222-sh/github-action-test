@@ -27,7 +27,6 @@ jobs:
         run: |
           cd Watoon
           sudo python -m venv /var/app/venv/staging-LQM1lest
-          source /var/app/venv/staging-LQM1lest/bin/activate
           python manage.py migrate
         
       - name: Generate deployment package
