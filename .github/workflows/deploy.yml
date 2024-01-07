@@ -26,6 +26,7 @@ jobs:
       - name: Database migration
         run: |
           cd Watoon
+          python -m venv /var/app/venv/staging-LQM1lest
           source /var/app/venv/staging-LQM1lest/bin/activate
           python manage.py migrate
 
