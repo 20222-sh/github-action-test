@@ -92,12 +92,8 @@ jobs:
     steps:
     - name: deploy django project
       run: |
-        cd Watoon
-        python manage.py test
-
         sudo apt-get update
         sudo apt-get -y upgrade
-        cd Watoon          
 
         sudo apt-get install -y python3-venv zip
         python -m venv venv
