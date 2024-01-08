@@ -77,13 +77,11 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        cd Watoon
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
     - name: Run Tests
       run: |
-        cd Watoon
         python manage.py test
 
   build:
