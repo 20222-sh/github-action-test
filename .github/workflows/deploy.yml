@@ -17,7 +17,7 @@ jobs:
         with:
           python-version: "3.8"
 
-      - name: Install dependencies
+      - name: Install dependencies & migration
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-venv
