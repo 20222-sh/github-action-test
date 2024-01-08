@@ -88,44 +88,90 @@ jobs:
     needs: ci
     runs-on: ubuntu-latest
     steps:
-    - name: deploy django project
-      run: |
-        sudo apt-get update
-        sudo apt-get -y upgrade
+      - name: Checkout
+        uses: actions/checkout@v2
 
-        sudo apt-get install -y python3-venv zip
-        python -m venv venv
-        source venv/bin/activate
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v3.1.3
+        with:
+          python-version: "3.8"
 
-        python -m pip install --upgrade pip
+      - name: Install dependencies & migration
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-venv zip
+          python -m venv venv
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+          
+          pip install -r requirements.txt
+          python -m pip uninstall mysqlclient
+          
+          python manage.py migrate
 
-        pip install -r requirements.txt
-        python -m pip uninstall mysqlclient
+      - name: Generate deployment package
+        run: zip -r deploy.zip . -x '*.git*'
 
-        python manage.py makemigrations
-        python manage.py migrate
+      - name: Get current time
+        uses: 1466587594/get-current-time@v2
+        id: current-time
+        with:
+          format: YYYY-MM-DDTHH-mm-ss
+          utcOffset: "+09:00"
+
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v21
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: test  # EB 애플리케이션명
+          environment_name: deploy2-env  # EB 환경명
+          version_label: github-action-${{ steps.current-time.outputs.formattedTime }}
+          region: ap-northeast-2
+          deployment_package: deploy.zip
+
+  # build:
+  #   needs: ci
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: deploy django project
+  #     run: |
+  #       sudo apt-get update
+  #       sudo apt-get -y upgrade
+
+  #       sudo apt-get install -y python3-venv zip
+  #       python -m venv venv
+  #       source venv/bin/activate
+
+  #       python -m pip install --upgrade pip
+
+  #       pip install -r requirements.txt
+  #       python -m pip uninstall mysqlclient
+
+  #       python manage.py makemigrations
+  #       python manage.py migrate
         
-    - name: Generate deployment package
-      run: zip -r deploy.zip . -x '*.git*'
+  #   - name: Generate deployment package
+  #     run: zip -r deploy.zip . -x '*.git*'
 
-    - name: Get current time
-      uses: 1466587594/get-current-time@v2
-      id: current-time
-      with:
-        format: YYYY-MM-DDTHH-mm-ss
-        utcOffset: "+09:00"
+  #   - name: Get current time
+  #     uses: 1466587594/get-current-time@v2
+  #     id: current-time
+  #     with:
+  #       format: YYYY-MM-DDTHH-mm-ss
+  #       utcOffset: "+09:00"
 
-    - name: Deploy to EB
-      uses: einaregilsson/beanstalk-deploy@v21
+  #   - name: Deploy to EB
+  #     uses: einaregilsson/beanstalk-deploy@v21
 
-      with:
-        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        application_name: test #EB 애플리케이션명
-        environment_name: deploy2-env #EB 환경명
-        version_label: github-action-${{steps.current-time.outputs.formattedTime}}
-        region: ap-northeast-2
-        deployment_package: deploy.zip
+  #     with:
+  #       aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #       aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #       application_name: test #EB 애플리케이션명
+  #       environment_name: deploy2-env #EB 환경명
+  #       version_label: github-action-${{steps.current-time.outputs.formattedTime}}
+  #       region: ap-northeast-2
+  #       deployment_package: deploy.zip
 
     # steps:
     #   - name: Checkout
