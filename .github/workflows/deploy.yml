@@ -81,6 +81,7 @@ jobs:
           
           cd Watoon
           pip install -r requirements.txt
+          python -m pip uninstall mysqlclient
           
           python manage.py migrate
         
