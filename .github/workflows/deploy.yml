@@ -100,14 +100,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-venv zip
-          python -m venv venv
-          source venv/bin/activate
-          python -m pip install --upgrade pip
+          # python -m venv venv
+          # source venv/bin/activate
+          # python -m pip install --upgrade pip
           
-          pip install -r requirements.txt
-          python -m pip uninstall mysqlclient
+          # pip install -r requirements.txt
+          # python -m pip uninstall mysqlclient
           
-          python manage.py migrate
+          # python manage.py migrate
 
       - name: Generate deployment package
         run: zip -r deploy.zip . -x '*.git*'
