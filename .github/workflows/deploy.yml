@@ -19,22 +19,26 @@ jobs:
 
       - name: Install dependencies & migration
         run: |
-          cd Watoon
           sudo apt-get update
-          sudo apt-get install -y python3-venv
+          sudo apt-get install -y python3-venv zip
           python -m venv venv
           source venv/bin/activate
           python -m pip install --upgrade pip
+          
+          cd Watoon
           pip install -r requirements.txt
           
           python manage.py migrate
 
       - name: Generate deployment package
-        run: zip -r deploy.zip Watoon -x 'Watoon/*.git*'
+        run: zip -r deploy.zip . -x '*.git*'
 
       - name: Get current time
+        uses: 1466587594/get-current-time@v2
         id: current-time
-        run: echo "::set-output name=formattedTime::$(date -u +'%Y-%m-%dT%H:%M:%S')"
+        with:
+          format: YYYY-MM-DDTHH-mm-ss
+          utcOffset: "+09:00"
 
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v21
