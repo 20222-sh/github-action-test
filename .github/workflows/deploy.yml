@@ -81,13 +81,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: create-json
-      id: create-json
-      uses: jsdaniell/create-json@1.1.2
-      with:
-        name: "secrets.json"
-        json: ${{ secrets.SECERT_JSON }} 
-        
     - name: Run Tests
       run: |
         cd Watoon
@@ -97,30 +90,46 @@ jobs:
     needs: ci
     runs-on: ubuntu-latest
     steps:
-    - name: EC2 ssh connection test
-      uses: appleboy/ssh-action@master
+    - name: deploy django project
+      run: |
+        cd Watoon
+        python manage.py test
+
+        sudo apt-get update
+        sudo apt-get -y upgrade
+        cd Watoon          
+
+        sudo apt-get install -y python3-venv zip
+        python -m venv venv
+        source venv/bin/activate
+
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        python -m pip uninstall mysqlclient
+
+        python manage.py migrate
+        
+    - name: Generate deployment package
+      run: zip -r deploy.zip . -x '*.git*'
+
+    - name: Get current time
+      uses: 1466587594/get-current-time@v2
+      id: current-time
       with:
-        host: ${{ secrets.SSH_HOST }}			# 연결할 EC2 
-        username: ${{ secrets.SSH_USERNAME }}	# 사용자
-        key: ${{ secrets.SSH_PEM }}				# pem 파일 내용
-        command_timeout: 3m						# timeout 시간 설정
-        script: |
-          # SSH로 실행하고 싶은 명령어 작성
+        format: YYYY-MM-DDTHH-mm-ss
+        utcOffset: "+09:00"
 
-          sudo apt-get update
-          sudo apt-get -y upgrade
-          cd Watoon          
+    - name: Deploy to EB
+      uses: einaregilsson/beanstalk-deploy@v21
 
-          sudo apt-get install -y python3-venv zip
-          python -m venv venv
-          source venv/bin/activate
-          git pull
-          sudo lsof -t -i tcp:8000 | xargs kill -9
-          pip install -r requirements.txt
-          python manage.py makemigrations	
-          python manage.py migrate
-          nohup gunicorn --bind 0.0.0.0:8000 Watoon.wsgi > nohup.out 2> nohup.err < /dev/null &
-          exit 0
+      with:
+        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        application_name: test #EB 애플리케이션명
+        environment_name: deploy2-env #EB 환경명
+        version_label: github-action-${{steps.current-time.outputs.formattedTime}}
+        region: ap-northeast-2
+        deployment_package: deploy.zip
 
     # steps:
     #   - name: Checkout
