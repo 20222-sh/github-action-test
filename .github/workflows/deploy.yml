@@ -100,14 +100,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-venv zip
-          # python -m venv venv
-          # source venv/bin/activate
-          # python -m pip install --upgrade pip
+          python -m venv venv
+          source venv/bin/activate
+          python -m pip install --upgrade pip
           
-          # pip install -r requirements.txt
-          # python -m pip uninstall mysqlclient
+          pip install -r requirements.txt
+          python -m pip uninstall mysqlclient
           
-          # python manage.py migrate
+          python manage.py migrate
 
       - name: Generate deployment package
         run: zip -r deploy.zip . -x '*.git*'
@@ -122,7 +122,7 @@ jobs:
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v21
         with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID2 }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           application_name: test  # EB 애플리케이션명
           environment_name: deploy2-env  # EB 환경명
