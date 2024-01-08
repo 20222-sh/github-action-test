@@ -19,37 +19,32 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd Watoon
+          sudo apt-get update
+          sudo apt-get install -y python3-venv
+          python -m venv venv
+          source venv/bin/activate
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r Watoon/requirements.txt
 
       - name: Database migration
         run: |
           cd Watoon
-          python -m venv venv
-          source venv/bin/activate
-    
-          pip install -r requirements.txt  # 필요한 경우 requirements.txt 파일을 사용하세요.
           python manage.py migrate
-        
+
       - name: Generate deployment package
-        run: zip -r deploy.zip . -x '*.git*'
+        run: zip -r deploy.zip Watoon -x 'Watoon/*.git*'
 
       - name: Get current time
-        uses: 1466587594/get-current-time@v2
         id: current-time
-        with:
-          format: YYYY-MM-DDTHH-mm-ss
-          utcOffset: "+09:00"
+        run: echo "::set-output name=formattedTime::$(date -u +'%Y-%m-%dT%H:%M:%S')"
 
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v21
-
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: test #EB 애플리케이션명
-          environment_name: Test-env #EB 환경명
-          version_label: github-action-${{steps.current-time.outputs.formattedTime}}
+          application_name: test  # EB 애플리케이션명
+          environment_name: Test-env  # EB 환경명
+          version_label: github-action-${{ steps.current-time.outputs.formattedTime }}
           region: ap-northeast-2
           deployment_package: deploy.zip
